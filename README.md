@@ -39,9 +39,9 @@ gene->
 
 
 Plink(latest version 2), one of the most popular tool for GWAS, does not support association for multi-alleic variants, although it takes categorical covariate as input.
-In some conditional analysis, if a variant having significant signal is in transcription region of a gene, all of the variants in the gene is used as covariate to robustly attribute the signal to the gene. Then, a number of covariates are addded to the association model. However, --glm in plink2.0 gives up continuing association test when covariate have some colinearity. (VIF) glm in statsmodels used by this tool partly automatically resolves the situation.
+In some conditional analysis, if a variant having significant signal is in transcription region of a gene, the variants in the gene is together used as covariate to robustly attribute the signal to the gene. Then, the association model has a number of covariates. Unfortunately, --glm in plink2.0 gives up continuing association test when covariate have some colinearity. (VIF) However, GLM in `Statsmodels` package used by this tool partly automatically resolves the situation.
 
-Therefore, specialized tool for this job is needed.
+Therefore, specialized tool for this job was needed and this tool was developed.
 
 
 ## Functionality
