@@ -1,0 +1,10 @@
+.ipynb_checkpoints
+data/
+!*.ipynb
+!*.R
+!*.py
+!*.sh
+!*.csh
+!*.md
+!*.doc
+!*.csv
