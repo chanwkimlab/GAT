@@ -568,9 +568,8 @@ def assoc_result_record(marker_name='',P=np.nan,nobs=np.nan,coef=np.nan,std=np.n
 family=(sm.families.Gaussian() if assoc=='linear' else sm.families.Binomial())
 
 for marker_idx,marker in enumerate(test_marker_list):
-    marker='6:34172055_C/A'
-    if marker_idx%1000==0:
-        log.info("{:.3f} %".format(marker_idx/len(test_marker_list)*100))
+    if marker_idx%5000==0:
+        log.info("Time: {} - {:.3f} %".format(time.strftime('%c', time.localtime(time.time())),marker_idx/len(test_marker_list)*100))
     try:
         if phased_marker_name_list is not None and marker in phased_marker_name_list:
             allele,dosage=phased_get_dosage(marker)        
@@ -693,7 +692,6 @@ for marker_idx,marker in enumerate(test_marker_list):
         assoc_result_record(marker_name=marker,note='PerfectSeparationError')
     else:
         pass
-    break
 
 
 # In[100]:

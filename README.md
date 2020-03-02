@@ -82,8 +82,8 @@ https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6292650/
 Python GAT.py \
 --assoc linear \
 --out sample_output \
---bgl-phased /data/ch6845/MHC_phewas_testbench/data/genotype/4_merge/KCHIP_HLA_AA_SNP.bgl.phased \
---bfile /data/ch6845/MHC_phewas_testbench/data/genotype/4_merge/KCHIP_HLA_SNP_1000G \
+--bgl-phased /data/ch6845/MHC_phewas_testbench/data/genotype/4_merge/HLA_AA_SNP.bgl.phased \
+--bfile /data/ch6845/MHC_phewas_testbench/data/genotype/4_merge/HLA_SNP_1000G \
 --multialleic (?P<name>HLA_[0-9A-Z]*)\*(?P<allele>[0-9:]*) \
 --multialleic-always (?P<name>AA_[A-Z0-9]*_[\-0-9]*_[0-9]*_exon[0-9]*)_*(?P<allele>[A-Z]*) \
 --pheno /data/ch6845/MHC_phewas_testbench/data/out_pheno/ALP.phe \
