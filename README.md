@@ -4,6 +4,24 @@ GAT (Generic Genome-Wide Association Tool) `1.0`
 
 `GAT` is a generic tool conducting GWAS(Genome-Wide Association Tool) for phased/unphased(=dosage) bialleic/multialleic markers simultaneously.
 
+## Getting Started
+
+1. `cd ANY_DESIRED_PATH`
+2. `git clone https://github.com/ch6845/GAT`
+3. `export PATH=$PATH:$ANY_DESIRED_PATH/GAT`
+    
+```
+GAT.py \
+--assoc linear \
+--out sample_output \
+--bgl-phased /data/ch6845/MHC_phewas_testbench/data/genotype/4_merge/HLA_AA_SNP.bgl.phased \
+--bfile /data/ch6845/MHC_phewas_testbench/data/genotype/4_merge/HLA_SNP_1000G \
+--multialleic (?P<name>HLA_[0-9A-Z]*)\*(?P<allele>[0-9:]*) \
+--multialleic-always (?P<name>AA_[A-Z0-9]*_[\-0-9]*_[0-9]*_exon[0-9]*)_*(?P<allele>[A-Z]*) \
+--pheno /data/ch6845/MHC_phewas_testbench/data/out_pheno/ALP.phe \
+--covar /data/ch6845/MHC_phewas_testbench/data/out_assoc/ALP/step_01.covar \
+--condition-list /data/ch6845/MHC_phewas_testbench/data/out_assoc/ALP/step_01.cond\
+```
 
 ## Why is it needed
 For multialleic(categorical) marker, to get the significance of the overall effect of alleles on the phenotype, statistical test called omnibus test is conducted.(https://en.wikipedia.org/wiki/Omnibus_test, https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6292650/)
@@ -26,9 +44,6 @@ In some conditional analysis, if a variant having significant signal is in trans
 Therefore, specialized tool for this job is needed.
 
 
-
-
-
 ## Functionality
 * Conduct GWAS(Genome-Wide Association Tool) for phased/unphased(=dosage) bialleic/multialleic markers simultaneously.
 * Flexible in defining multialleic markers (by regular expression)
@@ -42,11 +57,7 @@ Therefore, specialized tool for this job is needed.
 https://gatkforums.broadinstitute.org/gatk/discussion/6455/biallelic-vs-multiallelic-sites
 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6292650/
 
-## Getting Started
 
-1. `cd ANY_DESIRED_PATH`
-2. `git clone https://github.com/ch6845/GAT`
-3. `export PATH=$PATH:$ANY_DESIRED_PATH/GAT`
 
 
 ## Input / Output
@@ -76,20 +87,7 @@ https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6292650/
 * Log file
     *. log
     
-    
-## Example
-```
-Python GAT.py \
---assoc linear \
---out sample_output \
---bgl-phased /data/ch6845/MHC_phewas_testbench/data/genotype/4_merge/HLA_AA_SNP.bgl.phased \
---bfile /data/ch6845/MHC_phewas_testbench/data/genotype/4_merge/HLA_SNP_1000G \
---multialleic (?P<name>HLA_[0-9A-Z]*)\*(?P<allele>[0-9:]*) \
---multialleic-always (?P<name>AA_[A-Z0-9]*_[\-0-9]*_[0-9]*_exon[0-9]*)_*(?P<allele>[A-Z]*) \
---pheno /data/ch6845/MHC_phewas_testbench/data/out_pheno/ALP.phe \
---covar /data/ch6845/MHC_phewas_testbench/data/out_assoc/ALP/step_01.covar \
---condition-list /data/ch6845/MHC_phewas_testbench/data/out_assoc/ALP/step_01.cond\
-```
+
     
 ## Dependencies    
 * numpy              1.17.4 
