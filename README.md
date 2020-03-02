@@ -6,6 +6,8 @@ GAT (Generic Genome-Wide Association Tool) `1.0`
 
 ## Getting Started
 
+If you have used PLINK before, you will find it easy to use GAT.
+
 1. `cd ANY_DESIRED_PATH`
 2. `git clone https://github.com/ch6845/GAT`
 3. `export PATH=$PATH:$ANY_DESIRED_PATH/GAT`
