@@ -1,6 +1,27 @@
 Generic Association Tool `1.0`
 ========================================
 
+## Functionality
+* Flexible in defining multialleic markers
+    * For markers of multiple allelels, the reported p-value is from deviance from the null model.
+    * It can be used to test gene amino acid polymorphism (ex. HLA gene)
+* Support for phased markers. Two haplotypes from individuals are consided to have independent effect on phenotype.
+* Faster than R with same simulation settings and parameters
+    * Manually convert categorial input to onehot-encoded input (https://stackoverflow.com/questions/48898712/very-slow-glm-logistic-regression-in-r)
+    * Numpy use algorithm optimized for cpu (BLAS)
+    * Built-in function(data.table) for loading text file in R is slow.
+* Extract individuals in .phe from .bgl.phased and continue association test only with individuals
+* Integrity check between .fam, pedigree information from .bgl.phased
+
+
+
+## Getting Started
+
+1. `cd ANY_DESIRED_PATH`
+2. `git clone https://github.com/ch6845/Generic_Association_Tool`
+3. `export PATH=$PATH:$ANY_DESIRED_PATH/Generic_Association_Tool`
+
+
 ## Input / Output
 
 ### Input: 
@@ -28,7 +49,6 @@ Generic Association Tool `1.0`
     
     
 ## Example
-
 `
 Python GAT.py
 --assoc linear
@@ -42,18 +62,6 @@ Python GAT.py
 --condition_list data/out_assoc/ALP/step_01.cond
 `
     
-## Functionality
-* Flexible in defining multialleic markers
-    * For markers of multiple allelels, the reported p-value is from deviance from the null model.
-    * It can be used to test gene amino acid polymorphism (ex. HLA gene)
-* Support for phased markers. Two haplotypes from individuals are consided to have independent effect on phenotype.
-* Faster than R with same simulation settings and parameters
-    * Manually convert categorial input to onehot-encoded input (https://stackoverflow.com/questions/48898712/very-slow-glm-logistic-regression-in-r)
-    * Numpy use algorithm optimized for cpu (BLAS)
-    * Built-in function(data.table) for loading text file in R is slow.
-* Extract individuals in .phe from .bgl.phased and continue association test only with individuals
-* Integrity check between .fam, pedigree information from .bgl.phased
-
 ## Dependencies    
 * numpy              1.17.4 
 * pandas             0.25.3   
