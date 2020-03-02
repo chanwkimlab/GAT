@@ -2,7 +2,7 @@ GAT (Generic Genome-Wide Association Tool) `1.0`
 ========================================
 
 
-`GAT` is a generic tool conducting GWAS(Genome-Wide Association Tool) for phased/unphased(=dosage) bialleic/multialleic markers simultaneously.
+`GAT` is a generic tool for conducting GWAS(Genome-Wide Association Tool) on phased/unphased(=dosage) bialleic/multialleic markers simultaneously.
 
 ## Getting Started
 
