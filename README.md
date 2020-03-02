@@ -28,7 +28,8 @@ GAT.py \
 ## Why is it needed
 For multialleic(categorical) marker, to get the significance of the overall effect of alleles on the phenotype, statistical test called omnibus test is conducted.(https://en.wikipedia.org/wiki/Omnibus_test, https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6292650/)
 ```
-Our univariate tests of binary SNP and SNP allele markers, and our omnibus tests of polymorphic HLA amino acid positions both highlighted HLA-DRβ1, amino acid position 11 as the MHC feature most significantly associated with UC.
+Our univariate tests of binary SNP and SNP allele markers,
+and our omnibus tests of polymorphic HLA amino acid positions both highlighted HLA-DRβ1 amino acid position 11 as the MHC feature most significantly associated with UC.
 (from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3341846)
 ```
 In some cases, phased genotype is required for association study. When we condition a marker that may have some correlation with other variants(especially markers in same gene), distinguishing each haplotype may have a more reliable, larger-power result. (https://www.nature.com/articles/s41398-017-0010-9) Two haplotypes from individuals are consided to have independent effect on phenotype. For example, it can be used to condition amino acid polymorphism in a gene (ex. HLA gene)
@@ -43,7 +44,9 @@ gene->
 Plink(latest version 2), one of the most popular tool for GWAS, does not support association for multi-alleic variants, although it takes categorical covariate as input.
 In some conditional analysis, if a variant having significant signal is in transcription region of a gene, the variants in the gene is together used as covariate to robustly attribute the signal to the gene. 
 ```
-When the top-associated variant itself was the HLA gene polymorphism or the SNV and indel in strong LD with any of the HLA gene polymorphisms (r2 ≥ 0.7), we additionally included all the two-digit, four- digit and six-digit alleles and the amino acid polymorphisms of the corresponding HLA gene as covariates in the regression to robustly condition the associations attributable to the HLA gene, as previously described
+When the top-associated variant itself was the HLA gene polymorphism or the SNV and indel in strong LD with any of the HLA gene polymorphisms (r2 ≥ 0.7), 
+we additionally included all the two-digit, four- digit and six-digit alleles and the amino acid polymorphisms of the corresponding HLA gene
+as covariates in the regression to robustly condition the associations attributable to the HLA gene, as previously described
 Genetic and phenotypic landscape of the major histocompatibilty complex region in the Japanese population.
 (Hirata, Jun, et al. "Genetic and phenotypic landscape of the major histocompatibilty complex region in the Japanese population." Nature genetics 51.3 (2019): 470-480.)
 ```
