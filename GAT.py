@@ -24,7 +24,7 @@ import statsmodels.api as sm
 #jupyter nbconvert GAT.ipynb --to script
 
 
-# In[2]:
+# In[32]:
 
 
 def dir_path(path):
@@ -66,14 +66,14 @@ parser.add_argument('--covar', type=file_path,help='format is the same as plink'
 parser.add_argument('--condition-list',type=file_path,help='format is the same as plink')
 
 
-# In[3]:
+# In[33]:
 
 
-debug=True
+debug=False
 #debug=True
 
 if debug:
-    arg_split='--assoc linear --out sample_output --bgl-phased /data/ch6845/MHC_phewas_testbench/data/genotype/4_merge/KCHIP_HLA_AA_SNP.bgl.phased --bfile /data/ch6845/MHC_phewas_testbench/data/genotype/4_merge/KCHIP_HLA_SNP_1000G --multialleic (?P<name>HLA_[0-9A-Z]*)\*(?P<allele>[0-9:]*) --multialleic-always (?P<name>AA_[A-Z0-9]*_[\-0-9]*_[0-9]*_exon[0-9]*)_*(?P<allele>[A-Z]*) --pheno /data/ch6845/MHC_phewas_testbench/data/out_pheno/ALP.phe --covar /data/ch6845/MHC_phewas_testbench/data/out_assoc/ALP/step_01.covar --condition-list /data/ch6845/MHC_phewas_testbench/data/out_assoc/ALP/step_01.cond'.split(' ')
+    arg_split='--assoc linear --out sample_output --bgl-phased /data/ch6845/MHC_phewas_testbench/data/genotype/4_merge/KCHIP_HLA_AA_SNP.bgl.phased --bfile /data/ch6845/MHC_phewas_testbench/data/genotype/4_merge/KCHIP_HLA_SNP_1000G --multialleic (?P<name>HLA_[0-9A-Z]*)\*(?P<allele>[0-9:]*) --multialleic-always (?P<name>AA_[A-Z0-9]*_[\-0-9]*_[0-9]*_exon[0-9]*)_*(?P<allele>[A-Z]*) --pheno /data/ch6845/MHC_phewas_testbench/data/out_pheno/FEV_predicted.phe --covar /data/ch6845/MHC_phewas_testbench/data/out_assoc/FEV_predicted/step_01.plink.covar --condition-list /data/ch6845/MHC_phewas_testbench/data/out_assoc/FEV_predicted/step_01.plink.cond'.split(' ')
     args=parser.parse_args(arg_split)
 else:
     args=parser.parse_args()
@@ -82,7 +82,7 @@ if args.bfile is None and args.bgl_phased is None:
     raise argparse.ArgumentTypeError("either --bfile or --bgl-phased parameter is needed")    
 
 
-# In[4]:
+# In[7]:
 
 
 log = logging.getLogger('logger')
@@ -102,7 +102,7 @@ log.addHandler(streamHandler)
 log.info_head=lambda x: log.info('\n'+'*'*int((100-len(x))/2)+x+'*'*int((100-len(x))/2)+'\n')
 
 
-# In[5]:
+# In[8]:
 
 
 log.info_head("*********************************")
@@ -120,16 +120,17 @@ log.info('Working directory: '+os.getcwd())
 log.info('Hostname: '+socket.gethostname())
 
 log.info('Parameters\n'+'\n'.join(['--{} {}'.format(key,value) for key,value in vars(args).items()]))
+#print('Parameters\n'+'\n'.join(['--{} {}'.format(key,value) for key,value in vars(args).items()]))
 
 
-# In[6]:
+# In[9]:
 
 
 assoc=args.assoc
 out=args.out
 
 
-# In[7]:
+# In[10]:
 
 
 log.info_head("Data Loading")
@@ -137,7 +138,7 @@ log.info_head("Data Loading")
 
 # # parse input files
 
-# In[8]:
+# In[11]:
 
 
 plink=None
@@ -153,7 +154,7 @@ if args.bfile is not None:
     log.info("{} unphased variants loaded from {}".format(plink_bim.shape[0],args.bfile))
 
 
-# In[ ]:
+# In[12]:
 
 
 phased_FID_list=None
@@ -242,7 +243,7 @@ if args.bgl_phased is not None:
     log.info("{} samples ({} males, {} females) loaded from {}".format(len(phased_IID_list),(np.array(phased_sex_list).astype(int)==1).sum(),(np.array(phased_sex_list).astype(int)==2).sum(),args.bgl_phased))
 
 
-# In[ ]:
+# In[13]:
 
 
 pheno=pd.read_csv(args.pheno,header=None,sep='\t',names=['FID','IID','pheno'])
@@ -264,7 +265,7 @@ else:
 
 # # parse multialleic regular exp
 
-# In[ ]:
+# In[14]:
 
 
 log.info_head("Multialleic expression parsing")
@@ -332,7 +333,7 @@ log.info("phased, multialleic always: {}".format(','.join(multialleic_df_concat[
 
 # # parse optional input files
 
-# In[ ]:
+# In[15]:
 
 
 if args.covar is None:
@@ -348,7 +349,7 @@ else:
     log.info("{} covariates loaded from {}".format(len(covar.columns[2:]),args.covar))
 
 
-# In[ ]:
+# In[16]:
 
 
 if args.condition_list is None:
@@ -377,7 +378,7 @@ else:
 
 # # check idx integrity
 
-# In[ ]:
+# In[17]:
 
 
 log.info_head("Input integrity check")
@@ -403,13 +404,13 @@ assert len(diff)==0
 log.info("Passed condition integrity check (All variants in --condition-list are identified from loaded variants)")
 
 
-# In[ ]:
+# In[18]:
 
 
 log.info_head("Converting condtion to covariate")
 
 
-# In[ ]:
+# In[19]:
 
 
 def plink_get_dosage(marker,keep_allele_order=True,repeat=1):
@@ -446,7 +447,7 @@ def phased_get_dosage(marker,a1=None):
     return a1, phased_marker_data.astype(float)
 
 
-# In[ ]:
+# In[20]:
 
 
 def find_trivial_index(array2d):
@@ -461,19 +462,19 @@ def find_trivial_index(array2d):
         return None
 
 
-# In[ ]:
+# In[21]:
 
 
 covar_phased=covar.loc[covar.index.repeat(2)].reset_index().drop(columns='index')
 
 
-# In[ ]:
+# In[22]:
 
 
 pheno_phased=pheno.loc[pheno.index.repeat(2)].reset_index().drop(columns='index')#['pheno']
 
 
-# In[ ]:
+# In[23]:
 
 
 for condition in condition_list:
@@ -515,13 +516,14 @@ for condition in condition_list:
 
 # # Run regression
 
-# In[ ]:
+# In[24]:
 
 
 log.info_head("Regression")
+log.info("Start time: "+time.strftime('%c', time.localtime(time.time())))
 
 
-# In[ ]:
+# In[25]:
 
 
 test_marker_list=sorted(np.unique(plink_bim.index.tolist()+phased_marker_name_list+multialleic_df_concat['name'].tolist()).tolist())
@@ -532,7 +534,7 @@ test_marker_list=test_marker_list.difference(multialleic_df_concat[multialleic_d
 test_marker_list=list(test_marker_list)#np.random.shuffle(test_marker_list_temp)
 
 
-# In[ ]:
+# In[26]:
 
 
 x_data_intercept=np.array([np.ones(2*plink_fam.shape[0])]).transpose()    
@@ -544,7 +546,14 @@ x_data_null_names=['const']+covar_phased.columns[2:].tolist()
 y_data=pheno_phased['pheno'].values
 
 
-# In[ ]:
+# In[87]:
+
+
+reduce_1d=lambda x: np.mean(y_data.reshape(-1,2),axis=1)
+reduce_2d=lambda x: np.mean(x.reshape(int(x.shape[0]/2),-1,x.shape[1]),axis=1)
+
+
+# In[88]:
 
 
 assoc_result_list=[]
@@ -553,13 +562,14 @@ def assoc_result_record(marker_name='',P=np.nan,nobs=np.nan,coef=np.nan,std=np.n
     assoc_result_list.append({'marker_name':marker_name,'P':P,'nobs':nobs,'coef':coef,'std':std,'Z':Z,'chisq':chisq,'df':df,'term':term,'A1':A1,'multi_allele':multi_allele,'note':note})
 
 
-# In[ ]:
+# In[99]:
 
 
 family=(sm.families.Gaussian() if assoc=='linear' else sm.families.Binomial())
 
 for marker_idx,marker in enumerate(test_marker_list):
-    if marker_idx%100==0:
+    marker='6:34172055_C/A'
+    if marker_idx%1000==0:
         log.info("{:.3f} %".format(marker_idx/len(test_marker_list)*100))
     try:
         if phased_marker_name_list is not None and marker in phased_marker_name_list:
@@ -622,9 +632,11 @@ for marker_idx,marker in enumerate(test_marker_list):
             dosage=np.expand_dims(dosage,axis=1)
             x_data_full=np.concatenate([x_data_null,dosage],axis=1)
             x_data_full_names=x_data_null_names+['THIS']
-
-
-            model=sm.GLM(y_data, x_data_full, family=family,missing='drop')
+            
+            y_data_reduce=reduce_1d(y_data)
+            x_data_full_reduce=reduce_2d(x_data_full)
+            
+            model=sm.GLM(y_data_reduce, x_data_full_reduce, family=family,missing='drop')
             model_result=model.fit()
 
             for model_result_idx in range(len(model_result.params)):
@@ -650,14 +662,18 @@ for marker_idx,marker in enumerate(test_marker_list):
             bialleic_marker_dosage_cut=bialleic_marker_dosage if trivial_index is None else np.delete(bialleic_marker_dosage, trivial_index,axis=1)
 
             x_data_full=np.concatenate([x_data_null,bialleic_marker_dosage_cut],axis=1)       
+            
+            x_data_full_reduce=reduce_2d(x_data_full)
+            x_data_null_reduce=reduce_2d(x_data_null)
+            
+            y_data_reduce=reduce_1d(y_data)
+            
+            common_idx=(~np.isnan(y_data_reduce))&(np.isnan(x_data_null_reduce).sum(axis=1)==0)&(np.isnan(x_data_full_reduce).sum(axis=1)==0)
 
-
-            common_idx=(~np.isnan(y_data))&(np.isnan(x_data_null).sum(axis=1)==0)&(np.isnan(x_data_full).sum(axis=1)==0)
-
-            model_null=sm.GLM(y_data[common_idx], x_data_null[common_idx], family=family,missing='raise')
+            model_null=sm.GLM(y_data_reduce[common_idx], x_data_null_reduce[common_idx], family=family,missing='raise')
             model_null_result=model_null.fit()
 
-            model_full=sm.GLM(y_data[common_idx], x_data_full[common_idx], family=family,missing='raise')
+            model_full=sm.GLM(y_data_reduce[common_idx], x_data_full_reduce[common_idx], family=family,missing='raise')
             model_full_result=model_full.fit()        
 
             chisq_diff=2*(model_full_result.llf-model_null_result.llf)
@@ -677,37 +693,31 @@ for marker_idx,marker in enumerate(test_marker_list):
         assoc_result_record(marker_name=marker,note='PerfectSeparationError')
     else:
         pass
+    break
 
 
-# In[ ]:
-
+# In[100]:
 
 
 assoc_result_df_verbose=pd.DataFrame(assoc_result_list)[assoc_result_list_keys]
 assoc_result_df_concise=assoc_result_df_verbose[(assoc_result_df_verbose['term'].isnull())|(assoc_result_df_verbose['term']=='THIS')]
 
 
-# In[ ]:
+# In[101]:
 
 
 assoc_result_df_verbose.to_csv(out+'_verbose.tsv',sep='\t',index=None)
 assoc_result_df_concise.to_csv(out+'.tsv',sep='\t',index=None)
 
 
-# In[ ]:
+# In[102]:
 
 
 log.info("End time: "+time.strftime('%c', time.localtime(time.time())))
 
 
-# In[ ]:
+# In[103]:
 
 
-
-
-
-# In[ ]:
-
-
-
+assoc_result_df_concise.head()
 
