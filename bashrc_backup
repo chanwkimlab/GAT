@@ -1,0 +1,81 @@
+# .bashrc
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+	. /etc/bashrc
+fi
+
+# Uncomment the following line if you don't like systemctl's auto-paging feature:
+# export SYSTEMD_PAGER=
+
+# User specific aliases and functions
+
+alias cpua="ssh ch6845@147.46.184.230"
+alias cpub="ssh ch6845@147.46.184.241"
+alias cpuc="ssh ch6845@147.46.170.89"
+alias cpud="ssh ch6845@147.46.170.91"
+alias cpue="ssh ch6845@147.46.170.114"
+alias gpua="ssh ch6845@147.46.170.99"
+
+alias cpuaf="sftp ch6845@147.46.184.230"
+alias cpubf="sftp ch6845@147.46.184.241"
+alias cpucf="sftp ch6845@147.46.170.89"
+alias cpudf="sftp ch6845@147.46.170.91"
+alias cpuef="sftp ch6845@147.46.170.114"
+alias gpuaf="sftp ch6845@147.46.170.99"
+
+alias backup_tools="cd ~/ && tar cvf /data01/ch6845/tools.tar tools"
+alias restore_tools="tar xvf /data01/ch6845/tools.tar -C ~/"
+alias backup_bashrc="cp ~/.bashrc /data01/ch6845"
+alias restore_bashrc="cp /data01/ch6845/.bashrc ~/"
+
+export JAVA_HOME=$HOME/tools/jdk1.8
+export PATH=$JAVA_HOME/bin:$PATH
+
+#export PATH=$HOME/tools/libcurl/bin:$PATH
+
+alias git=$HOME/tools/git/bin/git
+alias git_all='cp ${HOME}/.bashrc ./bashrc_backup && git add . && git commit -m "mm" && git push origin master'
+
+export PATH=$HOME/tools/plink:$PATH
+export PATH=$HOME/tools/plink2:$PATH
+export PATH=$HOME/tools/plink1.07:$PATH
+
+export PATH=$HOME/tools/ldsc:$PATH
+export PATH=$HOME/tools/ldsc_my:$PATH
+export PATH=$HOME/tools/ldsc_cmrank:$PATH
+
+export PATH=$HOME/tools/hess:$PATH
+
+export PATH=$HOME/tools/qctool:$PATH
+
+export PATH=$HOME/tools/texlive/bin/x86_64-linux:$PATH
+
+export PATH=$HOME/tools/bedtools:$PATH
+
+export PATH=$PATH:$HOME/tools/parallel/bin
+
+export PATH=$HOME/tools/gcta/bin:$PATH
+
+export PATH=$HOME/tools/hugo:$PATH
+
+export SCREENDIR=$HOME/.screen
+alias screen_old=$HOME/tools/screen/screen
+
+export PATH=$HOME/tools/tree:$PATH
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/home/ch6845/tools/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/home/ch6845/tools/miniconda3/etc/profile.d/conda.sh" ]; then
+        . "/home/ch6845/tools/miniconda3/etc/profile.d/conda.sh"
+    else
+        export PATH="/home/ch6845/tools/miniconda3/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+

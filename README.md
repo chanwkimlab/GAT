@@ -19,35 +19,31 @@ Multiple Alleic Association Test Module
 
 `
 example
-omnibus_test.py    --assoc linear \
-    --out data/out_assoc/hba1c/step_02.omnibus \
-    --pheno data/out_assoc/hba1c/phenotype.phe \
-    --fam data/genotype/4_merge/KCHIP_HLA_SNP_1000G_merged.fam \
-    --covar data/out_assoc/hba1c/step_02.omnibus.covar.temp \
-    --aa data/out_assoc/hba1c/step_02.aa \
+omnibus_test.py    --assoc linear 
+    --out data/out_assoc/hba1c/step_02.omnibus 
+    --pheno data/out_assoc/hba1c/phenotype.phe 
+    --fam data/genotype/4_merge/???.fam 
+    --covar data/out_assoc/hba1c/step_02.omnibus.covar.temp 
+    --bglphased data/out_assoc/hba1c/step_02.bgl.phased
     --condition-list data/out_assoc/hba1c/step_02.omnibus.cond\
 `
     
 
 ## Functionality
-### support HLA gene multialleic test by Omnibus test
-### faster than R with same simulation settings and parameters
-* manually convert categorial input to onehot-encoded input (https://stackoverflow.com/questions/48898712/very-slow-glm-logistic-regression-in-r)
-* numpy use modules optimized for cpu(blas)
-* data.table module in R is slow
-### extract individuals in .phe from .bgl.phased and continue association test only with individuals
-### Integrity check between .fam, pedigree information from .bgl.phased
-### Simpler parameter parsing
-### can configure CPU thread limit
-
-
-
+* can define any marker as multialleic and do omnibus test
+    * support HLA gene multialleic test by omnibus test
+* faster than R with same simulation settings and parameters
+    * manually convert categorial input to onehot-encoded input (https://stackoverflow.com/questions/48898712/very-slow-glm-logistic-regression-in-r)
+    * numpy use modules optimized for cpu(blas)
+    * data.table module in R is slow
+* extract individuals in .phe from .bgl.phased and continue association test only with individuals
+* Integrity check between .fam, pedigree information from .bgl.phased
 
 ## Dependencies    
 * numpy              1.17.4 
 * pandas             0.25.3   
 * scipy              1.3.2 
 * statsmodels        0.10.1
-
+* pyplink            1.3.5
 
 ## Citation
