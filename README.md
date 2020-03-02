@@ -6,7 +6,7 @@ GAT (Generic Genome-Wide Association Tool) `1.0`
 
 ## Getting Started
 
-If you have used PLINK before, you will find it easy to use `GAT`.
+If you have used `PLINK` before, you will find it easy to use `GAT`.
 
 1. `cd ANY_DESIRED_PATH`
 2. `git clone https://github.com/ch6845/GAT`
@@ -51,7 +51,7 @@ Therefore, specialized tool for this job was needed and this tool was developed.
 * Flexible in defining multialleic markers (by regular expression)
 * Faster than R with same simulation settings and parameters
     * Manually convert categorial input to onehot-encoded input (https://stackoverflow.com/questions/48898712/very-slow-glm-logistic-regression-in-r)
-    * Numpy use algorithm optimized for cpu (BLAS)
+    * Numpy use algorithm optimized for Intel CPU (`BLAS`)
     * Built-in function(data.table) for loading text file in R is slow.
 
 ## Reference
@@ -92,10 +92,10 @@ https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6292650/
 
     
 ## Dependencies    
-* numpy              1.17.4 
-* pandas             0.25.3   
-* scipy              1.3.2 
-* statsmodels        0.10.1
-* pyplink            1.3.5
+* `numpy`              1.17.4 
+* `pandas`             0.25.3   
+* `scipy`              1.3.2 
+* `statsmodels`        0.10.1
+* `pyplink`            1.3.5
 
 ## Citation
