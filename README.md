@@ -1,42 +1,57 @@
-Multiple Alleic Association Test Module
+Generic Association Tool `1.0`
 ========================================
 
-## Input/Output
+## Input / Output
 
 ### Input: 
-* .bgl.phased (You can convert plink file to .bgl.phased using Beagle 5)  (TODO: support for plink file if conditional analysis is not done)
-* .fam (the same as plink)
-* .phe (the same as plink)
-* regular expression for identifying multialleic marker
-* (optional) .covar (the same as plink)
-* (optional) .condition (the same as plink except that the )
+* Genotype
+    Either or both of the following genotype files are required.
+    If a marker coexists on both of the files, priority is on --bgl.phased
+    * --bfile .bed/bim/fam
+    * --bgl-phased .bgl.phased (You can convert plink file to .bgl.phased using Beagle 5)
+* Phenotype
+    * --pheno .phe (the same as plink. values set as -9 is considered missing)
+* Regular expression for identifying multialleic marker
+    * --multialleic regex
+    * --multialleic-always regex
+* (Optional) .covar (the same as plink)
+    --covar .cover
+* (Optional) .condition (the same as plink --condition-list)
+    --condition-list .cond
     
 ### Ouput:
-* p-value for each merged marker (AA_A_1_Residue->AA_A_1) (HLA_A\*--:-- ->HLA_A)  chisquare - degree freedom - p-value
+* Association report
+    p-value for each merged marker (AA_A_1_Residue->AA_A_1) (HLA_A\*--:-- ->HLA_A)  chisquare - degree freedom - p-value
+    *.tsv
+* Log file
+    *. log
     
     
-## Usage
+## Example
 
 `
-example
-omnibus_test.py    --assoc linear 
-    --out data/out_assoc/hba1c/step_02.omnibus 
-    --pheno data/out_assoc/hba1c/phenotype.phe 
-    --fam data/genotype/4_merge/???.fam 
-    --covar data/out_assoc/hba1c/step_02.omnibus.covar.temp 
-    --bglphased data/out_assoc/hba1c/step_02.bgl.phased
-    --condition-list data/out_assoc/hba1c/step_02.omnibus.cond\
+Python GAT.py
+--assoc linear
+--out data/out_assoc/ALP/step_01
+--bgl_phased data/genotype/4_merge/HLA_AA_SNP.bgl.phased
+--bfile data/genotype/4_merge/HLA_SNP_1000G
+--multialleic (?P<name>HLA_[0-9A-Z]*)\*(?P<allele>[0-9:]*)
+--multialleic_always (?P<name>AA_[A-Z0-9]*_[0-9]*_[0-9]*_exon[0-9]*)_*(?P<allele>[A-Z]*)
+--pheno data/out_pheno/ALP.phe
+--covar data/out_assoc/ALP/step_01.covar
+--condition_list data/out_assoc/ALP/step_01.cond
 `
     
-
 ## Functionality
-* can define any marker as multialleic and do omnibus test
-    * support HLA gene multialleic test by omnibus test
-* faster than R with same simulation settings and parameters
-    * manually convert categorial input to onehot-encoded input (https://stackoverflow.com/questions/48898712/very-slow-glm-logistic-regression-in-r)
-    * numpy use modules optimized for cpu(blas)
-    * data.table module in R is slow
-* extract individuals in .phe from .bgl.phased and continue association test only with individuals
+* Flexible in defining multialleic markers
+    * For markers of multiple allelels, the reported p-value is from deviance from the null model.
+    * It can be used to test gene amino acid polymorphism (ex. HLA gene)
+* Support for phased markers. Two haplotypes from individuals are consided to have independent effect on phenotype.
+* Faster than R with same simulation settings and parameters
+    * Manually convert categorial input to onehot-encoded input (https://stackoverflow.com/questions/48898712/very-slow-glm-logistic-regression-in-r)
+    * Numpy use algorithm optimized for cpu (BLAS)
+    * Built-in function(data.table) for loading text file in R is slow.
+* Extract individuals in .phe from .bgl.phased and continue association test only with individuals
 * Integrity check between .fam, pedigree information from .bgl.phased
 
 ## Dependencies    
