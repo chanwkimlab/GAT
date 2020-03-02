@@ -49,7 +49,7 @@ Generic Association Tool `1.0`
     
     
 ## Example
-`
+```
 Python GAT.py
 --assoc linear
 --out data/out_assoc/ALP/step_01
@@ -60,7 +60,7 @@ Python GAT.py
 --pheno data/out_pheno/ALP.phe
 --covar data/out_assoc/ALP/step_01.covar
 --condition_list data/out_assoc/ALP/step_01.cond
-`
+```
     
 ## Dependencies    
 * numpy              1.17.4 
