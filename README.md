@@ -31,7 +31,7 @@ For multialleic(categorical) marker, to get the significance of the overall effe
 Our univariate tests of binary SNP and SNP allele markers, and our omnibus tests of polymorphic HLA amino acid positions both highlighted HLA-DRβ1, amino acid position 11 as the MHC feature most significantly associated with UC.
 (from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3341846)
 ```
-In some cases, assoicating phased genotype is required. When we condition a marker that may have some correlation with other variants(especially markers in same gene), distinguishing each haplotype may have a more reliable, larger-power result. (https://www.nature.com/articles/s41398-017-0010-9) Two haplotypes from individuals are consided to have independent effect on phenotype. For example, it can be used to condition amino acid polymorphism ina gene (ex. HLA gene)
+In some cases, phased genotype is required for association study. When we condition a marker that may have some correlation with other variants(especially markers in same gene), distinguishing each haplotype may have a more reliable, larger-power result. (https://www.nature.com/articles/s41398-017-0010-9) Two haplotypes from individuals are consided to have independent effect on phenotype. For example, it can be used to condition amino acid polymorphism ina gene (ex. HLA gene)
 
 In reality both phased genotype file and unphased genotype file exist for one dataset. Testing the variants of such diverse cases simultaneously is very labor-intensive and time-consuming.
 For example, 
