@@ -2,7 +2,7 @@ GAT (Generic Genome-Wide Association Tool) `1.0`
 ========================================
 
 
-`GAT` is a generic tool for conducting GWAS(Genome-Wide Association Tool) on phased/unphased(=dosage) bialleic/multialleic markers simultaneously.
+`GAT` is a generic tool for conducting GWAS(Genome-Wide Association Study) on phased/unphased(=dosage) bialleic/multialleic markers simultaneously.
 
 ## Getting Started
 
@@ -18,8 +18,8 @@ GAT.py \
 --out sample_output \
 --bgl-phased /data/ch6845/MHC_phewas_testbench/data/genotype/4_merge/HLA_AA_SNP.bgl.phased \
 --bfile /data/ch6845/MHC_phewas_testbench/data/genotype/4_merge/HLA_SNP_1000G \
---multialleic (?P<name>HLA_[0-9A-Z]*)\*(?P<allele>[0-9:]*) \
---multialleic-always (?P<name>AA_[A-Z0-9]*_[\-0-9]*_[0-9]*_exon[0-9]*)_*(?P<allele>[A-Z]*) \
+--multialleic "(?P<name>HLA_[0-9A-Z]*)\*(?P<allele>[0-9:]*)" \
+--multialleic-always "(?P<name>AA_[A-Z0-9]*_[\-0-9]*_[0-9]*_exon[0-9]*)_*(?P<allele>[A-Z]*)" \
 --pheno /data/ch6845/MHC_phewas_testbench/data/out_pheno/ALP.phe \
 --covar /data/ch6845/MHC_phewas_testbench/data/out_assoc/ALP/step_01.covar \
 --condition-list /data/ch6845/MHC_phewas_testbench/data/out_assoc/ALP/step_01.cond\
@@ -32,7 +32,7 @@ Our univariate tests of binary SNP and SNP allele markers,
 and our omnibus tests of polymorphic HLA amino acid positions both highlighted HLA-DRβ1 amino acid position 11 as the MHC feature most significantly associated with UC.
 (from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3341846)
 ```
-In some cases, phased genotype is required for association study. When we condition a marker that may have some correlation with other variants(especially markers in same gene), distinguishing each haplotype may have a more reliable, larger-power result. (https://www.nature.com/articles/s41398-017-0010-9) Two haplotypes from individuals are consided to have independent effect on phenotype. For example, it can be used to condition amino acid polymorphism in a gene (ex. HLA gene)
+In some cases, phased genotype is required for association study. When we condition a marker that may have some correlation with other variants(especially markers in same gene), distinguishing each haplotype may show a more reliable, larger-power result. (https://www.nature.com/articles/s41398-017-0010-9) Two haplotypes from individuals are consided to have independent effect on phenotype. For example, it can be used to condition amino acid polymorphism in a gene (ex. HLA gene)
 
 In reality, both phased genotype file and unphased genotype file can coexist for one dataset. Testing the variants of such diverse cases(bialleic-multialleic/phased-unphased) simultaneously is very labor-intensive and time-consuming especially when conducting stepwise conditional analysis.
 For example, 
@@ -56,7 +56,7 @@ Therefore, specialized tool for this job was needed and this tool was developed.
 
 
 ## Functionality
-* Conduct GWAS(Genome-Wide Association Tool) for phased/unphased(=dosage) bialleic/multialleic markers simultaneously.
+* Conduct GWAS(Genome-Wide Association Study) for phased/unphased(=dosage) bialleic/multialleic markers simultaneously.
 * Flexible in defining multialleic markers (by regular expression)
 * Faster than R with same simulation settings and parameters
     * Manually convert categorial input to onehot-encoded input (https://stackoverflow.com/questions/48898712/very-slow-glm-logistic-regression-in-r)

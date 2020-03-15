@@ -24,7 +24,68 @@ import statsmodels.api as sm
 #jupyter nbconvert GAT.ipynb --to script
 
 
-# In[32]:
+# In[2]:
+
+
+def plink_get_dosage(marker,keep_allele_order=True,repeat=1):
+    dosage=plink.get_geno_marker(marker).astype(float)
+    dosage[dosage==-1]=np.nan
+    if keep_allele_order or ((dosage==0).sum()>(dosage==2).sum()):
+        a1=plink_bim.loc[marker]['a1']
+        a2=plink_bim.loc[marker]['a2']
+    else:
+        a1=plink_bim.loc[marker]['a2']
+        a2=plink_bim.loc[marker]['a1']
+        dosage=2-dosage
+    return a1,a2,np.repeat(dosage,repeat)
+
+def phased_get_dosage(marker,a1=None):
+    phased_marker_idx=phased_marker_name_list.index(marker)
+    phased_marker_data=phased_marker_data_list[phased_marker_idx]
+    phased_marker_data_unique=np.unique(phased_marker_data)
+    if len(phased_marker_data_unique)>2:
+        raise NotImplementedError
+    if a1 is not None:
+        if a1==phased_marker_data_unique[1]:
+            a2=phased_marker_data_unique[0]     
+        elif a1==phased_marker_data_unique[0]:
+            a2=phased_marker_data_unique[1]       
+        else:
+            raise NotImplementedError
+    elif (phased_marker_data==phased_marker_data_unique[0]).sum()>(phased_marker_data==phased_marker_data_unique[1]).sum():
+        a1=phased_marker_data_unique[1]
+        a2=phased_marker_data_unique[0]
+    else:
+        a1=phased_marker_data_unique[0]
+        a2=phased_marker_data_unique[1]
+    phased_marker_data=np.where(phased_marker_data==a1, 1, phased_marker_data)
+    phased_marker_data=np.where(phased_marker_data==a2, 0, phased_marker_data)
+    return a1,a2, phased_marker_data.astype(float)
+
+
+# In[3]:
+
+
+def find_trivial_index(array2d):
+    array2d_sumcol=array2d.sum(axis=1)
+    array2d_sumrow=array2d.sum(axis=0)   
+    
+    array2d_sumrow_argmax=np.argmax(array2d_sumrow)
+    
+    if array2d_sumrow.shape[0]>1:
+        return array2d_sumrow_argmax
+    else:
+        return None
+
+
+# In[4]:
+
+
+reduce_1d=lambda x: np.mean(y_data.reshape(-1,2),axis=1)
+reduce_2d=lambda x: np.mean(x.reshape(int(x.shape[0]/2),-1,x.shape[1]),axis=1)
+
+
+# In[5]:
 
 
 def dir_path(path):
@@ -58,6 +119,7 @@ parser.add_argument('--bgl-phased', type=file_path,help='bgl-phased (See Beagle 
 parser.add_argument('--bfile', type=bfile_path,help='plink binary format')
 parser.add_argument('--multialleic',type=str,help='regular expression for specifying multiple alleic marker (comma delimiter)')
 parser.add_argument('--multialleic-always',type=str,help='regular expression for specifying multiple alleic marker (comma delimiter)')
+parser.add_argument('--skip',type=str,help='regular expression for specifying markers to skip (comma delimiter)')
 
 parser.add_argument('--pheno', type=file_path,required=True,help='format is the same as plink. Tab-delimited file without header, of which the first and second columns is family and within-family IDs respectively, and the third column is pheotype')
 
@@ -66,14 +128,15 @@ parser.add_argument('--covar', type=file_path,help='format is the same as plink'
 parser.add_argument('--condition-list',type=file_path,help='format is the same as plink')
 
 
-# In[33]:
+# In[11]:
 
 
 debug=False
-#debug=True
+#debug=False
 
 if debug:
-    arg_split='--assoc linear --out sample_output --bgl-phased /data/ch6845/MHC_phewas_testbench/data/genotype/4_merge/KCHIP_HLA_AA_SNP.bgl.phased --bfile /data/ch6845/MHC_phewas_testbench/data/genotype/4_merge/KCHIP_HLA_SNP_1000G --multialleic (?P<name>HLA_[0-9A-Z]*)\*(?P<allele>[0-9:]*) --multialleic-always (?P<name>AA_[A-Z0-9]*_[\-0-9]*_[0-9]*_exon[0-9]*)_*(?P<allele>[A-Z]*) --pheno /data/ch6845/MHC_phewas_testbench/data/out_pheno/FEV_predicted.phe --covar /data/ch6845/MHC_phewas_testbench/data/out_assoc/FEV_predicted/step_01.plink.covar --condition-list /data/ch6845/MHC_phewas_testbench/data/out_assoc/FEV_predicted/step_01.plink.cond'.split(' ')
+    os.chdir('/data/ch6845/MHC_phewas_testbench')
+    arg_split='--assoc linear --out data/out_assoc/ALP/step_04.GAT --bfile data/genotype/4_merge/1000G --bgl-phased data/genotype/4_merge/KCHIP_HLA_AA_SNP.bgl.phased --pheno data/out_pheno/albumin.phe --covar data/out_assoc/albumin/covar --condition-list data/out_assoc/albumin/step_03.cond --skip "(?P<name>6:[0-9]*_[A-Z]*/[\<\>A-Z\:0-9]*),(?P<name>rs[0-9]*),(?P<name>SNPS_.*),(?P<name>INS_SNPS_.*)" --multialleic "(?P<name>HLA_[0-9A-Z]*)\*(?P<allele>[0-9:]*)" --multialleic-always "(?P<name>AA_[A-Z0-9]*_[\-0-9]*_[0-9]*_exon[0-9]*)_*(?P<allele>[A-Z]*)"'.split(' ')
     args=parser.parse_args(arg_split)
 else:
     args=parser.parse_args()
@@ -82,7 +145,13 @@ if args.bfile is None and args.bgl_phased is None:
     raise argparse.ArgumentTypeError("either --bfile or --bgl-phased parameter is needed")    
 
 
-# In[7]:
+# In[12]:
+
+
+#%tb
+
+
+# In[13]:
 
 
 log = logging.getLogger('logger')
@@ -102,7 +171,7 @@ log.addHandler(streamHandler)
 log.info_head=lambda x: log.info('\n'+'*'*int((100-len(x))/2)+x+'*'*int((100-len(x))/2)+'\n')
 
 
-# In[8]:
+# In[14]:
 
 
 log.info_head("*********************************")
@@ -123,14 +192,14 @@ log.info('Parameters\n'+'\n'.join(['--{} {}'.format(key,value) for key,value in 
 #print('Parameters\n'+'\n'.join(['--{} {}'.format(key,value) for key,value in vars(args).items()]))
 
 
-# In[9]:
+# In[15]:
 
 
 assoc=args.assoc
 out=args.out
 
 
-# In[10]:
+# In[16]:
 
 
 log.info_head("Data Loading")
@@ -138,7 +207,7 @@ log.info_head("Data Loading")
 
 # # parse input files
 
-# In[11]:
+# In[17]:
 
 
 plink=None
@@ -154,7 +223,7 @@ if args.bfile is not None:
     log.info("{} unphased variants loaded from {}".format(plink_bim.shape[0],args.bfile))
 
 
-# In[12]:
+# In[18]:
 
 
 phased_FID_list=None
@@ -243,7 +312,7 @@ if args.bgl_phased is not None:
     log.info("{} samples ({} males, {} females) loaded from {}".format(len(phased_IID_list),(np.array(phased_sex_list).astype(int)==1).sum(),(np.array(phased_sex_list).astype(int)==2).sum(),args.bgl_phased))
 
 
-# In[13]:
+# In[19]:
 
 
 pheno=pd.read_csv(args.pheno,header=None,sep='\t',names=['FID','IID','pheno'])
@@ -265,7 +334,7 @@ else:
 
 # # parse multialleic regular exp
 
-# In[14]:
+# In[20]:
 
 
 log.info_head("Multialleic expression parsing")
@@ -276,7 +345,7 @@ plink_multialleic_always_dict={}
 phased_multialleic_dict={}
 phased_multialleic_always_dict={}
 
-for expression in args.multialleic.split(','):
+for expression in args.multialleic.strip().strip('"').split(','):
     re_exp=re.compile(expression)
     if plink is not None:
         for marker in plink_bim.index:
@@ -290,7 +359,7 @@ for expression in args.multialleic.split(','):
                 phased_multialleic_dict[marker]=name  
 
 
-for expression in args.multialleic_always.split(','):
+for expression in args.multialleic_always.strip().strip('"').split(','):
     re_exp=re.compile(expression)
     if plink is not None:
         for marker in plink_bim.index:
@@ -331,9 +400,40 @@ log.info("phased, multialleic: {}".format(','.join(multialleic_df_concat[(multia
 log.info("phased, multialleic always: {}".format(','.join(multialleic_df_concat[(multialleic_df_concat['from']=='phased')&(multialleic_df_concat['always']==True)]['name'].unique())))    
 
 
+# In[21]:
+
+
+log.info_head("Skip expression parsing")
+
+skip_list=[]
+
+for expression in args.skip.strip().strip('"').split(','):
+    log.info(expression)
+    re_exp=re.compile(expression)
+    if plink is not None:
+        for marker in plink_bim.index:
+            name=re_exp.search(marker).group('name') if re_exp.search(marker) is not None else None
+            if name is not None:
+                skip_list.append(name)
+                
+    if phased_marker_name_list is not None:
+        for marker in phased_marker_name_list:
+            name=re_exp.search(marker).group('name') if re_exp.search(marker) is not None else None
+            if name is not None:
+                skip_list.append(name)
+                                
+log.info("{} markers were identified from --skip".format(len(skip_list)))
+
+
+# In[ ]:
+
+
+
+
+
 # # parse optional input files
 
-# In[15]:
+# In[22]:
 
 
 if args.covar is None:
@@ -349,7 +449,7 @@ else:
     log.info("{} covariates loaded from {}".format(len(covar.columns[2:]),args.covar))
 
 
-# In[16]:
+# In[23]:
 
 
 if args.condition_list is None:
@@ -378,7 +478,7 @@ else:
 
 # # check idx integrity
 
-# In[17]:
+# In[24]:
 
 
 log.info_head("Input integrity check")
@@ -387,9 +487,13 @@ if plink_fam is not None and phased_FID_list is not None:
     assert np.all(plink_fam['IID']==phased_IID_list)
     assert np.all(plink_fam['fID']==phased_fID_list)
     assert np.all(plink_fam['mID']==phased_mID_list)
-    assert np.all(plink_fam['sex']==phased_sex_list)
-    log.info("Passed individual integrity check (Individuals from --bfile is the same as individuals from --bgl-phased)")
 
+    log.info("Passed individual integrity check (Individuals from --bfile is the same as individuals from --bgl-phased)")
+    try:
+        assert np.all(plink_fam['sex']==phased_sex_list)
+    except:
+        log.warning("However, sex is not matching ")
+        
 assert np.all(covar['FID']==(plink_fam['FID'] if plink_fam is not None else phased_FID_list))
 assert np.all(covar['IID']==(plink_fam['IID'] if plink_fam is not None else phased_IID_list))
 log.info("Passed individual integrity check (Individuals from --bfile or --bgl-phased is the same as individuals from --covar)")
@@ -404,77 +508,25 @@ assert len(diff)==0
 log.info("Passed condition integrity check (All variants in --condition-list are identified from loaded variants)")
 
 
-# In[18]:
+# In[25]:
 
 
 log.info_head("Converting condtion to covariate")
 
 
-# In[19]:
-
-
-def plink_get_dosage(marker,keep_allele_order=True,repeat=1):
-    dosage=plink.get_geno_marker(marker).astype(float)
-    dosage[dosage==-1]=np.nan
-    if keep_allele_order or ((dosage==0).sum()>(dosage==2).sum()):
-        a1=plink_bim.loc[marker]['a1']
-    else:
-        a1=plink_bim.loc[marker]['a2']
-        dosage=2-dosage
-    return a1,np.repeat(dosage,repeat)
-
-def phased_get_dosage(marker,a1=None):
-    phased_marker_idx=phased_marker_name_list.index(marker)
-    phased_marker_data=phased_marker_data_list[phased_marker_idx]
-    phased_marker_data_unique=np.unique(phased_marker_data)
-    if len(phased_marker_data_unique)>2:
-        raise NotImplementedError
-    if a1 is not None:
-        if a1==phased_marker_data_unique[1]:
-            a2=phased_marker_data_unique[0]     
-        elif a1==phased_marker_data_unique[0]:
-            a2=phased_marker_data_unique[1]       
-        else:
-            raise NotImplementedError
-    elif (phased_marker_data==phased_marker_data_unique[0]).sum()>(phased_marker_data==phased_marker_data_unique[1]).sum():
-        a1=phased_marker_data_unique[1]
-        a2=phased_marker_data_unique[0]
-    else:
-        a1=phased_marker_data_unique[0]
-        a2=phased_marker_data_unique[1]
-    phased_marker_data=np.where(phased_marker_data==a1, 1, phased_marker_data)
-    phased_marker_data=np.where(phased_marker_data==a2, 0, phased_marker_data)
-    return a1, phased_marker_data.astype(float)
-
-
-# In[20]:
-
-
-def find_trivial_index(array2d):
-    array2d_sumcol=array2d.sum(axis=1)
-    array2d_sumrow=array2d.sum(axis=0)   
-    
-    array2d_sumrow_argmax=np.argmax(array2d_sumrow)
-    
-    if array2d_sumrow.shape[0]>1:
-        return array2d_sumrow_argmax
-    else:
-        return None
-
-
-# In[21]:
+# In[26]:
 
 
 covar_phased=covar.loc[covar.index.repeat(2)].reset_index().drop(columns='index')
 
 
-# In[22]:
+# In[27]:
 
 
 pheno_phased=pheno.loc[pheno.index.repeat(2)].reset_index().drop(columns='index')#['pheno']
 
 
-# In[23]:
+# In[28]:
 
 
 for condition in condition_list:
@@ -490,7 +542,7 @@ for condition in condition_list:
         if len(np.unique(bialleic_marker_list))!=len(bialleic_marker_list):
             raise
             
-        bialleic_marker_dosage=np.array([dosage for allele,dosage in bialleic_marker_info_list]).transpose()
+        bialleic_marker_dosage=np.array([dosage for a1,a2,dosage in bialleic_marker_info_list]).transpose()
         trivial_index=find_trivial_index(bialleic_marker_dosage)
         bialleic_marker_list_cut=bialleic_marker_list if trivial_index is None else np.delete(bialleic_marker_list, trivial_index)
         bialleic_marker_dosage_cut=bialleic_marker_dosage if trivial_index is None else np.delete(bialleic_marker_dosage, trivial_index,axis=1)        
@@ -503,78 +555,121 @@ for condition in condition_list:
         if trivial_index is not None:
             log.info("==> To avoid coliearity, {} removed from {}".format(bialleic_marker_list[trivial_index] ,', '.join(bialleic_marker_list)))
     elif phased_marker_name_list is not None and condition in phased_marker_name_list:
-        allele,dosage=phased_get_dosage(condition)
+        a1,a2,dosage=phased_get_dosage(condition)
         covar_phased[condition]=dosage
         log.info("1 bialleic marker {} was added from --bgl-phased".format(condition))
     elif plink_bim is not None and condition in plink_bim.index:
-        allele,dosage=plink_get_dosage(condition,repeat=2)
+        a1,a2,dosage=plink_get_dosage(condition,repeat=2)
         covar_phased[condition]=dosage        
         log.info("1 bialleic marker {} was added from --bfile".format(condition))
     else:
         raise NotImplementedError
 
 
+# In[35]:
+
+
+covar_phased.to_csv(out+'.covar.tsv',sep='\t',index=None)
+covar_unphased=covar_phased.loc[np.arange(0,covar_phased.shape[0],2)].iloc[:,:2].merge(right=pd.DataFrame(reduce_2d(covar_phased.iloc[:,2:].values),columns=covar_phased.columns[2:],index=np.arange(0,covar_phased.shape[0],2)),
+                                                            left_index=True,right_index=True
+                                                            )
+covar_unphased.to_csv(out+'.covar_unphased.tsv',sep='\t',index=None)
+
+log.info("covariate of this analysis was saved to {} , {}".format(out+'.covar.tsv',out+'.covar_unphased.tsv'))
+
+
 # # Run regression
 
-# In[24]:
+# In[29]:
 
 
 log.info_head("Regression")
 log.info("Start time: "+time.strftime('%c', time.localtime(time.time())))
 
 
-# In[25]:
+# In[30]:
 
 
-test_marker_list=sorted(np.unique(plink_bim.index.tolist()+phased_marker_name_list+multialleic_df_concat['name'].tolist()).tolist())
-
-test_marker_list=pd.Index(test_marker_list)
+test_marker_list=multialleic_df_concat['name'].tolist()
+if plink_bim is not None:
+    test_marker_list+=plink_bim.index.tolist()
+if phased_marker_name_list is not None:
+    test_marker_list+=phased_marker_name_list
+test_marker_list=pd.Index(sorted(np.unique(test_marker_list).tolist()))
 test_marker_list=test_marker_list.difference(multialleic_df_concat[multialleic_df_concat['always']==True]['marker'])
+
+
+if len(skip_list)>0:
+    log.info("{} markers were identified from --skip".format(len(skip_list)))
+    log.info("And {} markers were skipped".format(len(test_marker_list.intersection(skip_list))))
+    test_marker_list=test_marker_list.difference(skip_list)
 
 test_marker_list=list(test_marker_list)#np.random.shuffle(test_marker_list_temp)
 
+log.info("Total markers to test : {}".format(len(test_marker_list)))
 
-# In[26]:
+
+# In[31]:
 
 
-x_data_intercept=np.array([np.ones(2*plink_fam.shape[0])]).transpose()    
+#test_marker_list
+
+
+# In[32]:
+
+
+if plink_fam is not None:
+    x_data_intercept=np.array([np.ones(2*plink_fam.shape[0])]).transpose()    
+else:
+    x_data_intercept=np.array([np.ones(2*len(phased_IID_list))]).transpose()    
+    
 x_data_covariate=covar_phased.iloc[:,2:].values
 
 x_data_null=np.concatenate([x_data_intercept,x_data_covariate],axis=1)
 x_data_null_names=['const']+covar_phased.columns[2:].tolist()
+x_data_null_reduce=reduce_2d(x_data_null)
 
 y_data=pheno_phased['pheno'].values
+y_data_reduce=reduce_1d(y_data)
 
 
-# In[87]:
-
-
-reduce_1d=lambda x: np.mean(y_data.reshape(-1,2),axis=1)
-reduce_2d=lambda x: np.mean(x.reshape(int(x.shape[0]/2),-1,x.shape[1]),axis=1)
-
-
-# In[88]:
+# In[45]:
 
 
 assoc_result_list=[]
-assoc_result_list_keys=['marker_name','P','nobs','coef','std','Z','chisq','df','term','A1','multi_allele','note']
-def assoc_result_record(marker_name='',P=np.nan,nobs=np.nan,coef=np.nan,std=np.nan,Z=np.nan,chisq=np.nan,df=np.nan,term=np.nan,A1=np.nan,multi_allele=np.nan,note=''):
-    assoc_result_list.append({'marker_name':marker_name,'P':P,'nobs':nobs,'coef':coef,'std':std,'Z':Z,'chisq':chisq,'df':df,'term':term,'A1':A1,'multi_allele':multi_allele,'note':note})
+assoc_result_list_keys=['marker_name','P','nobs','coef','std','Z','chisq','df','term','A1','A2','multi_allele','note']
+def assoc_result_record(marker_name='',P=np.nan,nobs=np.nan,coef=np.nan,std=np.nan,Z=np.nan,chisq=np.nan,df=np.nan,term=np.nan,A1=np.nan,A2=np.nan,multi_allele=np.nan,note=''):
+    assoc_result_list.append({'marker_name':marker_name,'P':P,'nobs':nobs,'coef':coef,'std':std,'Z':Z,'chisq':chisq,'df':df,'term':term,'A1':A1,'A2':A2,'multi_allele':multi_allele,'note':note})
 
 
-# In[99]:
+# In[46]:
+
+
+#test_marker_list#[4000:]
+
+
+# In[47]:
 
 
 family=(sm.families.Gaussian() if assoc=='linear' else sm.families.Binomial())
 
+#check_point_list=[[],[],[],[],[],[]]
+
+marker_check_interval=int(len(test_marker_list)/20)
+
 for marker_idx,marker in enumerate(test_marker_list):
-    if marker_idx%5000==0:
+    #marker='HLA_C'
+    if marker_idx%marker_check_interval==0:
         log.info("Time: {} - {:.3f} %".format(time.strftime('%c', time.localtime(time.time())),marker_idx/len(test_marker_list)*100))
     try:
         if phased_marker_name_list is not None and marker in phased_marker_name_list:
-            allele,dosage=phased_get_dosage(marker)        
+            a1,a2,dosage=phased_get_dosage(marker)        
             dosage=np.expand_dims(dosage,axis=1)
-            x_data_full=np.concatenate([x_data_null,dosage],axis=1)
+            
+            if marker in x_data_null_names:
+                x_data_full=np.concatenate([x_data_null,np.zeros_like(dosage)],axis=1)
+            else:
+                x_data_full=np.concatenate([x_data_null,dosage],axis=1)
             x_data_full_names=x_data_null_names+['THIS']
 
 
@@ -588,7 +683,8 @@ for marker_idx,marker in enumerate(test_marker_list):
                                     std=model_result.bse[model_result_idx],
                                     Z=model_result.tvalues[model_result_idx],
                                     term=x_data_full_names[model_result_idx],
-                                    A1=allele if x_data_full_names[model_result_idx]=='THIS' else np.nan,
+                                    A1=a1 if x_data_full_names[model_result_idx]=='THIS' else np.nan,
+                                    A2=a2 if x_data_full_names[model_result_idx]=='THIS' else np.nan,
                                     nobs=model_result.nobs,
                                     note='phased bialleic')        
 
@@ -598,7 +694,7 @@ for marker_idx,marker in enumerate(test_marker_list):
                 raise
             bialleic_marker_info_list=[phased_get_dosage(bialleic_marker) for bialleic_marker in bialleic_marker_list]
 
-            bialleic_marker_dosage=np.array([dosage for allele,dosage in bialleic_marker_info_list]).transpose()
+            bialleic_marker_dosage=np.array([dosage for a1,a2,dosage in bialleic_marker_info_list]).transpose()
             trivial_index=find_trivial_index(bialleic_marker_dosage)
             bialleic_marker_list_cut=bialleic_marker_list if trivial_index is None else np.delete(bialleic_marker_list, trivial_index)
             bialleic_marker_dosage_cut=bialleic_marker_dosage if trivial_index is None else np.delete(bialleic_marker_dosage, trivial_index,axis=1)
@@ -611,6 +707,7 @@ for marker_idx,marker in enumerate(test_marker_list):
             model_null=sm.GLM(y_data[common_idx], x_data_null[common_idx], family=family,missing='raise')
             model_null_result=model_null.fit()
 
+            
             model_full=sm.GLM(y_data[common_idx], x_data_full[common_idx], family=family,missing='raise')
             model_full_result=model_full.fit()        
 
@@ -627,13 +724,20 @@ for marker_idx,marker in enumerate(test_marker_list):
                                 note='phased multialleic')          
 
         elif plink_bim is not None and marker in plink_bim.index:
-            allele,dosage=plink_get_dosage(marker,repeat=2)
+            #check_point_list[0].append(time.time())
+            a1,a2,dosage=plink_get_dosage(marker,repeat=1)
             dosage=np.expand_dims(dosage,axis=1)
-            x_data_full=np.concatenate([x_data_null,dosage],axis=1)
+
+            
+            if marker in x_data_null_names:
+                x_data_full_reduce=np.concatenate([x_data_null_reduce,np.zeros_like(dosage)],axis=1)
+            else:
+                x_data_full_reduce=np.concatenate([x_data_null_reduce,dosage],axis=1)
             x_data_full_names=x_data_null_names+['THIS']
             
-            y_data_reduce=reduce_1d(y_data)
-            x_data_full_reduce=reduce_2d(x_data_full)
+            #y_data_reduce=y_data#reduce_1d(y_data)
+            #x_data_full_reduce=x_data_full#reduce_2d(x_data_full)
+            #check_point_list[1].append(time.time())
             
             model=sm.GLM(y_data_reduce, x_data_full_reduce, family=family,missing='drop')
             model_result=model.fit()
@@ -645,27 +749,25 @@ for marker_idx,marker in enumerate(test_marker_list):
                                     std=model_result.bse[model_result_idx],
                                     Z=model_result.tvalues[model_result_idx],
                                     term=x_data_full_names[model_result_idx],
-                                    A1=allele if x_data_full_names[model_result_idx]=='THIS' else np.nan,
+                                    A1=a1 if x_data_full_names[model_result_idx]=='THIS' else np.nan,
+                                    A2=a1 if x_data_full_names[model_result_idx]=='THIS' else np.nan,
                                     nobs=model_result.nobs,
                                     note='plink bialleic')
-
+            #check_point_list[2].append(time.time())
+            
         elif marker in multialleic_df_concat[multialleic_df_concat['from']=='plink']['name'].values:
             bialleic_marker_list=multialleic_df_concat[(multialleic_df_concat['from']=='plink')&(multialleic_df_concat['name']==marker)]['marker'].values
             if len(np.unique(bialleic_marker_list))!=len(bialleic_marker_list):
                 raise
-            bialleic_marker_info_list=[plink_get_dosage(bialleic_marker,repeat=2) for bialleic_marker in bialleic_marker_list]
+            bialleic_marker_info_list=[plink_get_dosage(bialleic_marker,repeat=1) for bialleic_marker in bialleic_marker_list]
 
-            bialleic_marker_dosage=np.array([dosage for allele,dosage in bialleic_marker_info_list]).transpose()
+            bialleic_marker_dosage=np.array([dosage for a1,a2,dosage in bialleic_marker_info_list]).transpose()
             trivial_index=find_trivial_index(bialleic_marker_dosage)
             bialleic_marker_list_cut=bialleic_marker_list if trivial_index is None else np.delete(bialleic_marker_list, trivial_index)
             bialleic_marker_dosage_cut=bialleic_marker_dosage if trivial_index is None else np.delete(bialleic_marker_dosage, trivial_index,axis=1)
 
-            x_data_full=np.concatenate([x_data_null,bialleic_marker_dosage_cut],axis=1)       
-            
+            x_data_full_reduce=np.concatenate([x_data_null_reduce,bialleic_marker_dosage_cut],axis=1)       
             x_data_full_reduce=reduce_2d(x_data_full)
-            x_data_null_reduce=reduce_2d(x_data_null)
-            
-            y_data_reduce=reduce_1d(y_data)
             
             common_idx=(~np.isnan(y_data_reduce))&(np.isnan(x_data_null_reduce).sum(axis=1)==0)&(np.isnan(x_data_full_reduce).sum(axis=1)==0)
 
@@ -688,24 +790,32 @@ for marker_idx,marker in enumerate(test_marker_list):
                                 note='plink multialleic') 
     
     except sm.tools.sm_exceptions.PerfectSeparationError as e:
-        log.waring("{} PerfectSeparationError".format(marker))
+        log.warning("{} PerfectSeparationError".format(marker))
         assoc_result_record(marker_name=marker,note='PerfectSeparationError')
     else:
         pass
 
 
-# In[100]:
+# In[48]:
+
+
+#assoc_result_list
+#test_marker_list
+#pd.DataFrame(assoc_result_list)[assoc_result_list_keys]
+
+
+# In[123]:
 
 
 assoc_result_df_verbose=pd.DataFrame(assoc_result_list)[assoc_result_list_keys]
 assoc_result_df_concise=assoc_result_df_verbose[(assoc_result_df_verbose['term'].isnull())|(assoc_result_df_verbose['term']=='THIS')]
 
 
-# In[101]:
+# In[103]:
 
 
-assoc_result_df_verbose.to_csv(out+'_verbose.tsv',sep='\t',index=None)
-assoc_result_df_concise.to_csv(out+'.tsv',sep='\t',index=None)
+assoc_result_df_verbose.to_csv(out+'.result_verbose.tsv',sep='\t',index=None)
+assoc_result_df_concise.to_csv(out+'.result.tsv',sep='\t',index=None)
 
 
 # In[102]:
@@ -714,8 +824,14 @@ assoc_result_df_concise.to_csv(out+'.tsv',sep='\t',index=None)
 log.info("End time: "+time.strftime('%c', time.localtime(time.time())))
 
 
-# In[103]:
+# In[297]:
 
 
-assoc_result_df_concise.head()
+
+
+
+# In[45]:
+
+
+#len(test_marker_list)
 
