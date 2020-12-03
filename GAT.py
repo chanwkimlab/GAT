@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[2]:
 
 
 import os
@@ -24,7 +24,7 @@ import statsmodels.api as sm
 #jupyter nbconvert GAT.ipynb --to script
 
 
-# In[2]:
+# In[3]:
 
 
 def plink_get_dosage(marker,keep_allele_order=True,repeat=1):
@@ -63,7 +63,7 @@ def phased_get_dosage(marker,a1=None):
     return a1,a2, phased_marker_data.astype(float)
 
 
-# In[3]:
+# In[4]:
 
 
 def find_trivial_index(array2d):
@@ -78,14 +78,14 @@ def find_trivial_index(array2d):
         return None
 
 
-# In[4]:
+# In[5]:
 
 
 reduce_1d=lambda x: np.mean(y_data.reshape(-1,2),axis=1)
 reduce_2d=lambda x: np.mean(x.reshape(int(x.shape[0]/2),-1,x.shape[1]),axis=1)
 
 
-# In[5]:
+# In[6]:
 
 
 def dir_path(path):
@@ -128,7 +128,7 @@ parser.add_argument('--covar', type=file_path,help='format is the same as plink'
 parser.add_argument('--condition-list',type=file_path,help='format is the same as plink')
 
 
-# In[11]:
+# In[7]:
 
 
 debug=False
@@ -345,33 +345,34 @@ plink_multiallelic_always_dict={}
 phased_multiallelic_dict={}
 phased_multiallelic_always_dict={}
 
-for expression in args.multiallelic.strip().strip('"').split(','):
-    re_exp=re.compile(expression)
-    if plink is not None:
-        for marker in plink_bim.index:
-            name,allele=(re_exp.search(marker).group('name'),re_exp.search(marker).group('allele')) if re_exp.search(marker) is not None else (None,None)
-            if name is not None:
-                plink_multiallelic_dict[marker]=name
-    if phased_marker_name_list is not None:
-        for marker in phased_marker_name_list:
-            name,allele=(re_exp.search(marker).group('name'),re_exp.search(marker).group('allele')) if re_exp.search(marker) is not None else (None,None)
-            if name is not None:
-                phased_multiallelic_dict[marker]=name  
+if args.multiallelic is not None:
+    for expression in args.multiallelic.strip().strip('"').split(','):
+        re_exp=re.compile(expression)
+        if plink is not None:
+            for marker in plink_bim.index:
+                name,allele=(re_exp.search(marker).group('name'),re_exp.search(marker).group('allele')) if re_exp.search(marker) is not None else (None,None)
+                if name is not None:
+                    plink_multiallelic_dict[marker]=name
+        if phased_marker_name_list is not None:
+            for marker in phased_marker_name_list:
+                name,allele=(re_exp.search(marker).group('name'),re_exp.search(marker).group('allele')) if re_exp.search(marker) is not None else (None,None)
+                if name is not None:
+                    phased_multiallelic_dict[marker]=name  
 
+if args.multiallelic_always is not None:
+    for expression in args.multiallelic_always.strip().strip('"').split(','):
+        re_exp=re.compile(expression)
+        if plink is not None:
+            for marker in plink_bim.index:
+                name,allele=(re_exp.search(marker).group('name'),re_exp.search(marker).group('allele')) if re_exp.search(marker) is not None else (None,None)
+                if name is not None:
+                    plink_multiallelic_always_dict[marker]=name
 
-for expression in args.multiallelic_always.strip().strip('"').split(','):
-    re_exp=re.compile(expression)
-    if plink is not None:
-        for marker in plink_bim.index:
-            name,allele=(re_exp.search(marker).group('name'),re_exp.search(marker).group('allele')) if re_exp.search(marker) is not None else (None,None)
-            if name is not None:
-                plink_multiallelic_always_dict[marker]=name
-                
-    if phased_marker_name_list is not None:
-        for marker in phased_marker_name_list:
-            name,allele=(re_exp.search(marker).group('name'),re_exp.search(marker).group('allele')) if re_exp.search(marker) is not None else (None,None)
-            if name is not None:
-                phased_multiallelic_always_dict[marker]=name
+        if phased_marker_name_list is not None:
+            for marker in phased_marker_name_list:
+                name,allele=(re_exp.search(marker).group('name'),re_exp.search(marker).group('allele')) if re_exp.search(marker) is not None else (None,None)
+                if name is not None:
+                    phased_multiallelic_always_dict[marker]=name
                 
 plink_multiallelic_df=pd.DataFrame(list(zip(plink_multiallelic_dict.keys(),plink_multiallelic_dict.values())),columns=['marker','name'])
 plink_multiallelic_df['from']='plink'

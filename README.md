@@ -29,10 +29,10 @@ python /data/ch6845/MHC_phewas_testbench/Generic_Association_Tool/GAT.py \
 
 plink2 \
 --glm \
---bfile data/genotype/4_merge/KCHIP_SNP_1000G \
---pheno data/out_pheno/height.phe \
+--bfile /data/ch6845/MHC_phewas_testbench/data/genotype/4_merge/KCHIP_SNP_1000G \
+--pheno /data/ch6845/MHC_phewas_testbench/data/out_pheno/height.phe \
 --out step_02.plink \
---covar data/out_assoc/height/step_02.GAT.covar_unphased.tsv \
+--covar step_02.GAT.covar_unphased.tsv \
 --covar-variance-standardize \
 --threads 40
 
