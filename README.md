@@ -38,7 +38,7 @@ plink2 \
 
 ```
 
-## Why is it needed
+## Motivation
 For multiallelic(categorical) marker, to get the significance of the overall effect of alleles on the phenotype, statistical test called omnibus test is conducted.(https://en.wikipedia.org/wiki/Omnibus_test, https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6292650/)
 ```
 Our univariate tests of binary SNP and SNP allele markers,
@@ -113,7 +113,6 @@ https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6292650/
     for multiallelic markers, report (chisquare/degree of freedom/p value) p-value is from deviance from the null model.
 * Log file
     *. log
-    
 
     
 ## Dependencies    
@@ -124,3 +123,20 @@ https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6292650/
 * `pyplink`            1.3.5
 
 ## Citation
+If you use any part of this code or our data, please cite our
+[paper](https://doi.org/10.1093/hmg/ddac016).
+```
+@article{kim2022phenome,
+  title={Phenome-wide association study of the major histocompatibility complex region in the Korean population identifies novel association signals},
+  author={Kim, Chanwoo and Kim, Young Jin and Choi, Wanson and Jang, Hye-Mi and Hwang, Mi Yeong and Jung, Sunwoo and Lim, Hyunjoon and Hong, Sang Bin and Yoon, Kyungheon and Kim, Bong-Jo and others},
+  journal={Human molecular genetics},
+  year={2022}
+}
+```
+
+## Contact
+If you have any inquiries, please feel free to contact
+- [Chanwoo Kim](https://chanwoo.kim) (Seoul National University)
+
+
+
