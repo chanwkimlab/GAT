@@ -124,7 +124,7 @@ https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6292650/
 
 ## Citation
 If you use any part of this code, please cite our
-[paper](https://doi.org/10.1093/hmg/ddac016), which introduced this software package.
+[paper](https://doi.org/10.1093/hmg/ddac016), in which introduced this software package.
 ```
 @article{kim2022phenome,
   title={Phenome-wide association study of the major histocompatibility complex region in the Korean population identifies novel association signals},
