@@ -123,8 +123,8 @@ https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6292650/
 * `pyplink`            1.3.5
 
 ## Citation
-If you use any part of this code or our data, please cite our
-[paper](https://doi.org/10.1093/hmg/ddac016).
+If you use any part of this code, please cite our
+[paper](https://doi.org/10.1093/hmg/ddac016), which introduced this software package.
 ```
 @article{kim2022phenome,
   title={Phenome-wide association study of the major histocompatibility complex region in the Korean population identifies novel association signals},
